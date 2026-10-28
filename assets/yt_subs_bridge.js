@@ -244,7 +244,8 @@
                 || (pr && pr.videoDetails && pr.videoDetails.defaultAudioLanguage);
             if (typeof lang === 'string' && /^pl/i.test(lang.trim())) res.polish = true;
             var tr = pr && pr.captions && pr.captions.playerCaptionsTracklistRenderer && pr.captions.playerCaptionsTracklistRenderer.captionTracks;
-            if (Array.isArray(tr)) tr.forEach(function (t) { if (/^pl/i.test(t.languageCode || '') && t.kind !== 'asr') res.polish = true; });
+            // [AGENT-EXP] 2026-10-28: także automatyczne (asr) polskie napisy — YouTube robi je z mowy, więc mówią po polsku
+            if (Array.isArray(tr)) tr.forEach(function (t) { if (/^pl/i.test(t.languageCode || '')) res.polish = true; });
             res.videoId = pr && pr.videoDetails && pr.videoDetails.videoId;
         } catch (e) {}
         reply(d.reqId, { done: true, ok: true, polish: res.polish, videoId: res.videoId });

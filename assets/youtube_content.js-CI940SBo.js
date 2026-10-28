@@ -323,7 +323,7 @@ if (!('__lektorBufPauza' in window)) {
         if (video && video.isConnected) return video;
         video = document.querySelector('video.html5-main-video') || document.querySelector('video');
         if (video) {
-            video.addEventListener('seeked', function () { ttResync = true; playingIds.clear(); try { filePlayed.clear(); } catch (e) {} stopSpeechSilently(); });   // [AGENT-EXP] cofnięcie → plik czytany jeszcze raz
+            video.addEventListener('seeked', function () { ttResync = true; playingIds.clear(); try { filePlayed.clear(); } catch (e) {} stopSpeechSilently('seek'); });   // [AGENT-EXP] cofnięcie → plik czytany jeszcze raz; 2026-10-28 'seek' = bez podgłaśniania
             video.addEventListener('pause', function () { if (lektorPausedVideo) return; stopSpeechSilently('pause'); }); // OPTIONS-PAGE: pauza od lektora nie kasuje bufora; [AGENT-EXP] 2026-10-22 'pause' → przy „Czytaj zawsze do końca” lektor dokańcza zdanie
             video.addEventListener('play', function () { if (lektorSelfPlay) { lektorSelfPlay = false; return; } ttResync = true; });
             video.addEventListener('volumechange', function () {
@@ -363,6 +363,7 @@ if (!('__lektorBufPauza' in window)) {
         if (IS_EMBED) return;
         if (!duckReady || !enabled) return;   // [AGENT-EXP] 2026-10-20: nie ściszaj filmu, zanim wczytamy ustawienia (start z enabled=true) ani przy wyłączonym lektorze
         var v = getVideo(); if (!v) return;
+        if (isPolishVideo()) { if (savedVolume !== null || duckMemGet() !== null) restoreVolume(); return; }   // [AGENT-EXP] 2026-10-27: film po polsku → lektor milczy, więc nie ściszamy (i oddajemy głośność)
         var target = duckLevel / 100;
         duckOrig(v);   // [AGENT-EXP] 2026-10-20
         if (savedVolume === null && v.volume > target) savedVolume = v.volume;
@@ -439,7 +440,7 @@ if (!('__lektorBufPauza' in window)) {
         // [AGENT-EXP] 2026-10-17: po pauzie / przewinięciu zleć preload jeszcze raz (gotowe nagrania lektor odda
         // od razu z pamięci / dysku) — wcześniej kwestie zostawały „zleconymi”, a ich dźwięk przepadał
         try { ttPreloaded.clear(); filePreloaded.clear(); } catch (e) {}
-        playingIds.clear(); if (!IS_EMBED) restoreVolume();
+        playingIds.clear(); if (!IS_EMBED && reason !== 'seek' && reason !== 'pause') restoreVolume();   // [AGENT-EXP] 2026-10-28: przewinięcie/pauza nie podgłaśnia na chwilę filmu (zaraz i tak znów ściszany)
     }
 
     // --- Czyszczenie tekstu ---
@@ -684,6 +685,10 @@ if (!('__lektorBufPauza' in window)) {
         polishTrackCache = detectPolishAudioTrackNow();
         return polishTrackCache;
     }
+    // [AGENT-EXP] 2026-10-27: wspólny warunek „film po polsku” (ścieżka audio lub kanał) — dla skanu i dla ściszania
+    function isPolishVideo() {
+        return (opt('detectYTPolish', true) && detectPolishAudioTrack()) || (opt('detectYTPolishChannel', true) && optPolishVideo);
+    }
     function detectPolishAudioTrackNow() {
         var v = getVideo();
         if (v && v.audioTracks && v.audioTracks.length) {
@@ -740,8 +745,7 @@ if (!('__lektorBufPauza' in window)) {
         if (!enabled || engine !== 'offline') return;
         if (document.visibilityState !== 'visible') return; // karta w tle: zero wyszukiwania
         if (IS_EMBED) { embedScan(); return; }
-        if (opt('detectYTPolish', true) && detectPolishAudioTrack()) { stopSpeechSilently(); return; }
-        if (opt('detectYTPolishChannel', true) && optPolishVideo) { stopSpeechSilently(); return; } // OPTIONS-PAGE
+        if (isPolishVideo()) { stopSpeechSilently(); applyDuck(); return; }   // [AGENT-EXP] 2026-10-27: applyDuck przy polskim = przywróć głośność // OPTIONS-PAGE
         muteHoverPreview();
         // ENERGIA: napisy z pliku / osi czasu czyta scheduler — DOM skanujemy tylko gdy jest podgląd hover.
         if (fileSubs.length || (USE_TIMEDTEXT && ttSubs.length)) {
@@ -1046,6 +1050,10 @@ if (!('__lektorBufPauza' in window)) {
         return b;
     }
     function livedubApplyState(btn) {
+        // [AGENT-EXP] 2026-10-28: ikonę podmieniamy tylko przy zmianie stanu — co 1 s nowe innerHTML między
+        // naciśnięciem a puszczeniem myszy kasowało klik (Chrome nie wysyła click, gdy element spod myszy zniknął)
+        if (btn.dataset.on === String(enabled)) return;
+        btn.dataset.on = String(enabled);
         btn.innerHTML = enabled ? LIVEDUB_ICON_ON : LIVEDUB_ICON_OFF;
         btn.title = enabled ? 'Lektor: w\u0142\u0105czony (klik = STOP)' : 'Lektor: wy\u0142\u0105czony (klik = START)';
         btn.style.opacity = enabled ? '1' : '0.55';
