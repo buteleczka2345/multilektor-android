@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Matcha-TTS-PL — prędkość syntezy (CPU / GPU, INT8 / FP32)</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 16px; background: #ffffff; color: #000000; font: 14px/1.5 system-ui, sans-serif; }
+        h1 { font-size: 20px; margin: 0 0 6px; color: #000000; }
+        h2 { font-size: 16px; margin: 24px 0 8px; color: #000000; }
+        p { color: #444444; margin: 4px 0 12px; max-width: 900px; }
+        button { font: inherit; padding: 7px 16px; cursor: pointer; border: 1px solid #bbbbbb; background: #ffffff; color: #000000; border-radius: 4px; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        label { display: block; margin: 5px 0; cursor: pointer; font-size: 13px; color: #000000; }
+        label input { margin-right: 8px; }
+        table { border-collapse: collapse; margin: 10px 0; font-variant-numeric: tabular-nums; width: 100%; font-size: 13px; }
+        th, td { border: 1px solid #bbbbbb; padding: 5px 8px; text-align: right; vertical-align: top; color: #000000; background: #ffffff; }
+        th { background: #f4f4f6; color: #000000; }
+        td.l, th.l { text-align: left; }
+        .best { color: #0a7d32; font-weight: 700; }
+        .worst { color: #b3261e; font-weight: 700; }
+        #log { color: #444444; white-space: pre-wrap; font: 12px ui-monospace, monospace; max-height: 220px; overflow: auto; background: #fafafa; padding: 10px; border: 1px solid #bbbbbb; border-radius: 4px; margin-bottom: 12px; }
+        .row { margin: 14px 0; padding: 12px; background: #f8f9fa; border: 1px solid #bbbbbb; border-radius: 6px; }
+        .hint { color: #666666; font-size: 12.5px; }
+        .warn { color: #b3261e; font-weight: 600; }
+        .ok { color: #0a7d32; font-weight: 600; }
+        select { font: inherit; padding: 5px 8px; margin-left: 4px; color: #000000; background: #ffffff; }
+        input[type=text] { font: inherit; padding: 5px 8px; width: 100%; max-width: 700px; color: #000000; background: #ffffff; border: 1px solid #bbbbbb; }
+        .grid-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; margin-top: 8px; }
+        .badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; margin-left: 6px; background: #f4f4f6; color: #000000; }
+    </style>
+</head>
+<body>
+    <h1>⚡ Benchmark Matcha-TTS-PL — prędkość syntezy</h1>
+    <p>Te same zdania, te same warunki. Mierzy czas syntezy (ms), długość wygenerowanej mowy (s) oraz współczynnik <b>RTF</b> (real-time factor) — im niższy, tym szybciej niż w czasie rzeczywistym (np. 0,25 = 4× szybciej niż mowa).</p>
+
+    <div class="row">
+        <strong>📝 Zdania testowe:</strong>
+        <div class="grid-checks">
+            <label><input type="checkbox" class="sent" value="0" checked> Krótkie: „Dzień dobry, jak się masz?”</label>
+            <label><input type="checkbox" class="sent" value="1" checked> Codzienne: „Jutro rano muszę wybrać się do sklepu po chleb i mleko.”</label>
+            <label><input type="checkbox" class="sent" value="2" checked> Dłuższe: „Przepraszam, gdzie jest najbliższa apteka? Potrzebuję kupić leki na gorączkę i kaszel.”</label>
+            <label><input type="checkbox" class="sent" value="3"> Własne: <input type="text" id="customSent" placeholder="wpisz własne zdanie…"></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <strong>⚙️ Warianty do przetestowania:</strong>
+        <div class="grid-checks">
+            <label><input type="checkbox" class="var" value="kombi_voc_gpu" checked> KOMBI · koder + dekoder CPU INT8, wokoder GPU FP32 (sdp_int8 + t4_int8 + fp32, karta) · 2 workery <span class="badge">najszybszy</span></label><!-- [AGENT-EXP] 2026-10-24: tylko 2 warianty -->
+            <label><input type="checkbox" class="var" value="cpu_fp32" checked> CPU · FP32 · wszystko na procesorze (sdp + t4 + fp32) · 2 workery</label>
+        </div>
+    </div>
+
+    <div class="row">
+        <button id="run">▶ Start testów</button>
+        <button id="clear">🗑 Wyczyść wyniki</button>
+        <span id="status" class="hint"></span>
+    </div>
+    <div id="log"></div>
+
+    <h2>Wyniki</h2>
+    <div id="out"></div>
+
+    <p class="hint"><b>Uwaga o GPU:</b> zgodnie z kodem <i>matcha.worker.js</i>, pliki <b>int8 i fp16 zawsze liczone są na procesorze (WASM)</b> — WebGPU obsługuje tylko fp32. Oznacza to, że wariant „GPU · INT8” w tym silniku działa w rzeczywistości na CPU. Prawdziwe przyspieszenie kartą graficzną daje tylko FP32 + WebGPU.</p>
+    <p class="hint"><b>Uwaga o pierwszym teście w wariancie:</b> pierwszy raz przy danym wariancie model (~30 MB) ładuje się do workera — ten czas jest dłuższy. Kolejne testy tego samego wariantu mierzą już czysty wniosek.</p>
+
+    <script type="module" src="matcha-bench.js"></script>
+</body>
+</html>

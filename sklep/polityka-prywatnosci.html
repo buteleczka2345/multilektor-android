@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multilektor — polityka prywatności</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d1f24; --muted: #5b6070; --line: #e3e5ea; --accent: #3b5bdb; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #15171c; --fg: #e8eaf0; --muted: #a2a7b5; --line: #2b2f38; --accent: #8ea6ff; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 19px; margin: 32px 0 8px; }
+  p, li { color: var(--fg); }
+  .meta { color: var(--muted); margin: 0 0 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  a { color: var(--accent); }
+  .wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Multilektor — polityka prywatności</h1>
+  <p class="meta">Obowiązuje od 21 października 2026 r. · Rozszerzenie Chrome „Multilektor”</p>
+
+  <p>Multilektor czyta napisy filmów na głos po polsku. Nie wymaga konta, nie wyświetla reklam i nie zbiera danych
+  o Tobie na żadnym serwerze autora. Autor rozszerzenia nie prowadzi własnego serwera i nie otrzymuje żadnych danych.</p>
+
+  <h2>Co zostaje na Twoim komputerze</h2>
+  <ul>
+    <li>Ustawienia lektora (głos, tempo, głośność, wybrane opcje) — w pamięci rozszerzenia w przeglądarce.</li>
+    <li>Pamięć przetłumaczonych napisów (do 90 dni) i nagranej mowy lektora (do 30 dni) — w IndexedDB przeglądarki,
+      żeby po powrocie do filmu nie tłumaczyć i nie syntezować od nowa.</li>
+    <li>Wbudowane głosy (Sherpa/Piper, Supertonic) i Translator Chrome działają lokalnie — tekst nie opuszcza komputera.</li>
+  </ul>
+  <p>Wszystko to usuniesz, odinstalowując rozszerzenie albo czyszcząc jego dane w ustawieniach Chrome.</p>
+
+  <h2>Co może trafić do usług zewnętrznych</h2>
+  <p>Wyłącznie wtedy, gdy dana funkcja jest włączona i potrzebna, i wyłącznie w zakresie opisanym niżej:</p>
+  <div class="wrap">
+  <table>
+    <tr><th>Usługa</th><th>Kiedy</th><th>Co jest wysyłane</th></tr>
+    <tr><td>YouTube (Google)</td><td>Film na YouTube</td><td>Prośba o napisy filmu, w tym o polskie automatyczne tłumaczenie YouTube — tak jak robi to sam odtwarzacz.</td></tr>
+    <tr><td>Microsoft Translator (Bing), Google Translate, DeepL</td><td>Napisy trzeba przetłumaczyć, a nie da się lokalnie</td><td>Tylko tekst napisów i kod języka.</td></tr>
+    <tr><td>Rozpoznawanie mowy przeglądarki (Google)</td><td>Funkcje „Mój głos → tekst” i „Film w karcie → napisy”, gdy wyłączone jest rozpoznawanie lokalne</td><td>Dźwięk z mikrofonu albo karty — przetwarza go Chrome.</td></tr>
+    <tr><td>Głosy sieciowe przeglądarki (np. „Google polski”, „Microsoft … Online”)</td><td>Gdy wybierzesz silnik „Głos przeglądarki” z głosem sieciowym</td><td>Tekst kwestii do przeczytania — obsługuje go przeglądarka.</td></tr>
+    <tr><td>OpenSubtitles, SubDL</td><td>Gdy sam wyszukasz napisy w bazie</td><td>Tytuł / identyfikator filmu i język.</td></tr>
+    <tr><td>Usługa AI zgodna z OpenAI (np. CometAPI)</td><td>Tylko gdy sam ją włączysz i podasz własny klucz</td><td>Tekst napisów do tłumaczenia.</td></tr>
+    <tr><td>Hugging Face, jsDelivr</td><td>Pierwsze użycie głosu Supertonic albo OCR w innym języku</td><td>Pobranie plików modelu / danych językowych (bez Twoich danych).</td></tr>
+    <tr><td>Twój komputer (127.0.0.1)</td><td>Gdy wybierzesz własny serwer mowy</td><td>Tekst kwestii do lokalnego programu.</td></tr>
+  </table>
+  </div>
+  <p>Te usługi działają według własnych polityk prywatności. Multilektor nie wysyła im danych identyfikujących
+  Ciebie, historii przeglądania ani treści stron poza tekstem napisów.</p>
+
+  <h2>Czego Multilektor nie robi</h2>
+  <ul>
+    <li>Nie sprzedaje i nie przekazuje danych w celach reklamowych ani innych niezwiązanych z czytaniem napisów.</li>
+    <li>Nie zbiera danych osobowych, haseł, danych płatniczych, lokalizacji ani historii przeglądania.</li>
+    <li>Nie wykorzystuje danych do oceny zdolności kredytowej ani udzielania pożyczek.</li>
+  </ul>
+
+  <h2>Uprawnienia</h2>
+  <p>Dostęp do stron jest potrzebny, żeby odczytać napisy oglądanego filmu i ściszyć jego dźwięk na czas mowy.
+  Przechwytywanie karty (<code>tabCapture</code>) działa tylko po uruchomieniu funkcji „Film w karcie → napisy”.</p>
+
+  <h2>Kontakt</h2>
+  <p>Pytania i zgłoszenia dotyczące prywatności: <a href="https://github.com/buteleczka2345/lektor-google-rpc/issues">github.com/buteleczka2345/lektor-google-rpc/issues</a> (załóż nowe zgłoszenie — „New issue”).</p>
+</main>
+</body>
+</html>
